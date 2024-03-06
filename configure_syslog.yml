@@ -1,0 +1,28 @@
+---
+- name: Configurar servidor Syslog
+  hosts: all
+  become: yes
+  tasks:
+  - name: Instalar rsyslog
+    ansible.builtin.package:
+      name: rsyslog
+      state: present
+  
+  - name: Habilitar recebimento de logs remotos em TCP/514
+    ansible.builtin.lineinfile:
+      path: /etc/rsyslog.conf
+      regexp: '^#?module\\(load="imtcp"\\)'
+      line: 'module(load="imtcp")'
+      state: present
+  
+  - name: Especificar porta TCP para rsyslog ouvir
+    ansible.builtin.lineinfile:
+      path: /etc/rsyslog.conf
+      regexp: '^#?input\\(type="imtcp" port="514"\\)'
+      line: 'input(type="imtcp" port="514")'
+      state: present
+
+  - name: Reiniciar rsyslog para aplicar as configurações
+    ansible.builtin.service:
+      name: rsyslog
+      state: restarted
